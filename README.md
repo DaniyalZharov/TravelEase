@@ -4,6 +4,13 @@ A Flask and MariaDB university project for organizing trips and recording flight
 
 TravelEase connects requirements analysis and relational database design with a working web application. It records booking information entered by the user; it does **not** search live inventory, purchase tickets, process payments, or issue real reservations.
 
+
+## Project Report
+
+[Read the TravelEase Project Report](docs/ISTE430_Group5_Report.pdf)
+
+Includes requirements analysis, stakeholder interviews, data flow diagrams, and database design.
+
 ## Features
 
 - Account login with hashed passwords and session management.
