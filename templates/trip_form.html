@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trip Creation Form - TravelEase</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card">
+
+      <div class="card-header">
+        <span class="brand">TravelEase</span>
+        <span class="version">Version 1.0</span>
+      </div>
+
+      <div class="card-title-row">
+        <div>
+          <div class="card-title">Trip Creation Form</div>
+          <div class="card-subtitle">Create a new trip and select your destination</div>
+        </div>
+        <div class="card-meta">
+          <div>Page: 1 of 1</div>
+          <div>Date: {{ today }}</div>
+        </div>
+      </div>
+
+      {% if errors %}
+      <div class="error-box">
+        {% for error in errors %}
+        <div class="error-item">- {{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="/create-trip">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-body">
+
+          <div class="form-row">
+            <label class="form-label muted">User ID:</label>
+            <div class="field-readonly">Auto-filled from session</div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="trip_name">Trip Name: <span class="required">*</span></label>
+            <input class="field-input" type="text" id="trip_name" name="trip_name"
+                   placeholder="e.g. Summer Vacation 2026"
+                   value="{{ request.form.get('trip_name', '') }}" required>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="destination_id">Destination: <span class="required">*</span></label>
+            <select class="field-input" id="destination_id" name="destination_id" required>
+              <option value="">Select destination...</option>
+              {% for dest in destinations %}
+              <option value="{{ dest.DestinationID }}"
+                {% if request.form.get('destination_id') == dest.DestinationID|string %}selected{% endif %}>
+                {{ dest.City }}, {{ dest.CountryName }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Travel Dates: <span class="required">*</span></label>
+            <div class="date-grid">
+              <input class="field-input" type="date" name="start_date"
+                     value="{{ request.form.get('start_date', '') }}" required>
+              <input class="field-input" type="date" name="end_date"
+                     value="{{ request.form.get('end_date', '') }}" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="status">Status:</label>
+            <select class="field-input" id="status" name="status">
+              <option value="Planning"  {% if request.form.get('status', 'Planning') == 'Planning'  %}selected{% endif %}>Planning</option>
+              <option value="Confirmed" {% if request.form.get('status') == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+              <option value="Completed" {% if request.form.get('status') == 'Completed' %}selected{% endif %}>Completed</option>
+            </select>
+          </div>
+
+          <div class="required-note">* Required fields</div>
+
+          <div class="visa-panel">
+            <div class="visa-panel-title">Visa Information</div>
+            <div class="visa-panel-text">
+              Illustrative destination data only; not personalized visa advice.
+            </div>
+            <div class="visa-panel-placeholder">Visa details will appear here after destination is selected</div>
+          </div>
+
+        </div>
+
+        <div class="card-footer">
+          <a href="/" class="btn">Cancel</a>
+          <div class="btn-group">
+            <a href="/" class="btn">Back</a>
+            <button type="submit" class="btn btn-primary">Save Trip</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+<script>
+const destination = document.getElementById('destination_id');
+const visaPanel = document.querySelector('.visa-panel-placeholder');
+async function showVisa() {
+  const selected = destination.value;
+  visaPanel.textContent = selected ? 'Loading demo information…' : 'Select a destination to see demo information.';
+  if (!selected) return;
+  try {
+    const response = await fetch('/visa-info/' + encodeURIComponent(selected));
+    if (!response.ok) throw new Error('Lookup failed');
+    const entries = await response.json();
+    if (destination.value !== selected) return;
+    visaPanel.textContent = entries.length ? entries.map(v => v.VisaType + ': ' + v.Requirements).join(' ') : 'No demo information available.';
+  } catch (error) {
+    if (destination.value === selected) visaPanel.textContent = 'Demo information unavailable.';
+  }
+}
+destination.addEventListener('change', showVisa);
+showVisa();
+</script>
+</body>
+</html>

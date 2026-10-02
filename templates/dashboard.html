@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - TravelEase</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .dashboard-welcome {
+      padding: 24px 24px 0;
+    }
+    .welcome-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .welcome-sub {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+    .action-bar {
+      padding: 18px 24px;
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .trips-section {
+      padding: 0 24px 8px;
+    }
+    .trips-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 18px 0 12px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .trip-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .trip-row:last-child { border-bottom: none; }
+    .trip-info {}
+    .trip-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .trip-meta {
+      font-size: 12px;
+      color: #888;
+    }
+    .trip-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+    .badge-planning  { background: #1e2d3d; color: #4a90e2; }
+    .badge-confirmed { background: #1f3d1a; color: #7dd87d; }
+    .badge-completed { background: #2a2a2a; color: #888; }
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: transparent;
+      color: #e8e8e8;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-sm:hover { background: #222; }
+    .btn-sm-primary {
+      background: #185FA5;
+      border-color: #185FA5;
+      color: #ffffff;
+    }
+    .btn-sm-primary:hover { background: #1471c4; }
+    .empty-state {
+      text-align: center;
+      padding: 40px 24px;
+      color: #888;
+      font-size: 14px;
+    }
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+    .stats-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .stat-item {
+      flex: 1;
+      padding: 16px 24px;
+      border-right: 1px solid #2a2a2a;
+      text-align: center;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card">
+
+      <!-- Header -->
+      <div class="card-header">
+        <span class="brand">TravelEase</span>
+        <span class="version">Version 1.0</span>
+      </div>
+
+      <!-- Welcome -->
+      <div class="dashboard-welcome">
+        <div class="card-title-row" style="padding: 22px 0 0; border: none;">
+          <div>
+            <div class="welcome-title">Welcome back, {{ user.Name.split()[0] }}!</div>
+            <div class="welcome-sub">{{ today }} &nbsp;|&nbsp; Plan your next adventure</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-bar" style="margin-top: 18px;">
+        <div class="stat-item">
+          <div class="stat-number">{{ trips | length }}</div>
+          <div class="stat-label">Total Trips</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">{{ trips | selectattr('Status', 'equalto', 'Confirmed') | list | length }}</div>
+          <div class="stat-label">Confirmed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">{{ trips | selectattr('Status', 'equalto', 'Planning') | list | length }}</div>
+          <div class="stat-label">Planning</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">{{ trips | sum(attribute='BookingCount') }}</div>
+          <div class="stat-label">Bookings</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-bar">
+        <a href="/create-trip" class="btn btn-primary">+ Create New Trip</a>
+        <a href="/booking" class="btn">+ Add Booking</a>
+      </div>
+
+      <!-- Trips List -->
+      <div class="trips-section">
+        <div class="trips-header">YOUR TRIPS</div>
+
+        {% if trips %}
+          {% for trip in trips %}
+          <div class="trip-row">
+            <div class="trip-info">
+              <div class="trip-name">{{ trip.TripName }}</div>
+              <div class="trip-meta">
+                {{ trip.City }}, {{ trip.CountryName }}
+                &nbsp;&middot;&nbsp;
+                {% if trip.StartDate %}{{ trip.StartDate.strftime('%d %b %Y') }}{% endif %}
+                &ndash;
+                {% if trip.EndDate %}{{ trip.EndDate.strftime('%d %b %Y') }}{% endif %}
+                &nbsp;&middot;&nbsp;
+                {{ trip.BookingCount }} booking{{ 's' if trip.BookingCount != 1 else '' }}
+              </div>
+            </div>
+            <div class="trip-actions">
+              <span class="badge badge-{{ trip.Status | lower }}">{{ trip.Status }}</span>
+              <a href="/booking?trip_id={{ trip.TripID }}" class="btn-sm btn-sm-primary">Add Booking</a>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">✈</div>
+            <div>No trips yet. Create your first trip to get started.</div>
+            <br>
+            <a href="/create-trip" class="btn btn-primary">Create Your First Trip</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Footer -->
+      <div class="card-footer">
+        <div style="font-size: 12px; color: #888;">Logged in as {{ user.Name }}</div>
+        <div class="btn-group">
+          <a href="/create-trip" class="btn btn-primary">New Trip</a>
+          <form method="POST" action="/logout" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn">Logout</button></form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

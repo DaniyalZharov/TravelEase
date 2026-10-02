@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - TravelEase</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-wrapper {
+      width: 100%;
+      max-width: 420px;
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .login-logo-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+    .login-logo-sub {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+    .login-card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .login-header {
+      background: #185FA5;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .login-body {
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .login-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .login-subtitle {
+      font-size: 13px;
+      color: #888;
+    }
+    .login-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .login-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #c8c8c8;
+    }
+    .login-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #2a2a2a;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .demo-box {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #888;
+      line-height: 1.8;
+    }
+    .demo-box strong {
+      color: #aaa;
+    }
+    .error-banner {
+      background: #2b1717;
+      border: 1px solid #6e2929;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #ff8080;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+
+    <div class="login-logo">
+      <div class="login-logo-title">TravelEase</div>
+      <div class="login-logo-sub">Smart Travel Planning System</div>
+    </div>
+
+    <div class="login-card">
+
+      <div class="login-header">
+        <span class="brand">TravelEase</span>
+        <span class="version">Version 1.0</span>
+      </div>
+
+      <form method="POST" action="/login">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="login-body">
+
+          <div>
+            <div class="login-title">Sign in to your account</div>
+            <div class="login-subtitle">Enter your credentials to access your trips</div>
+          </div>
+
+          {% if error %}
+          <div class="error-banner">{{ error }}</div>
+          {% endif %}
+
+          <div class="login-field">
+            <label class="login-label" for="email">Email Address</label>
+            <input class="field-input" type="email" id="email" name="email"
+                   placeholder="e.g. daniyal@travelease.com"
+                   value="{{ request.form.get('email', '') }}" required>
+          </div>
+
+          <div class="login-field">
+            <label class="login-label" for="password">Password</label>
+            <input class="field-input" type="password" id="password" name="password"
+                   placeholder="Enter your password" required>
+          </div>
+
+          <div class="demo-box">
+            <strong>Demo Accounts:</strong><br>
+            alex@example.com<br>
+            jordan@example.com<br>
+            sam@example.com<br>
+            Use the demo password you chose during setup.
+          </div>
+
+        </div>
+
+        <div class="login-footer">
+          <button type="submit" class="btn btn-primary" style="width: 100%; text-align: center;">
+            Sign In
+          </button>
+        </div>
+      </form>
+
+    </div>
+
+    <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #555;">
+      ISTE 430 &mdash; Group 5 &mdash; Spring 2026 &mdash; RIT Dubai
+    </div>
+
+  </div>
+</body>
+</html>

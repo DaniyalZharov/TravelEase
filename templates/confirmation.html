@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Confirmation - TravelEase</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card">
+
+      <div class="card-header">
+        <span class="brand">TravelEase</span>
+        <span class="version">Version 1.0</span>
+      </div>
+
+      <div class="card-title-row">
+        <div>
+          <div class="card-title">Booking Confirmation Report</div>
+          <div class="card-subtitle">Summary of confirmed booking details</div>
+        </div>
+        <div class="card-meta">
+          <div>Page: 1 of 1</div>
+          <div>Generated: {{ today }}</div>
+          <div>Valid as of: {{ today }}</div>
+        </div>
+      </div>
+
+      <div class="report-section">
+        <div class="section-label">TRAVELER INFORMATION</div>
+        <table class="report-table">
+          <tr>
+            <td class="report-key">Traveler Name:</td>
+            <td class="report-val bold">{{ booking.Name }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">User ID:</td>
+            <td class="report-val">USR-{{ '%05d' | format(booking.UserID) }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Nationality:</td>
+            <td class="report-val">{{ booking.Nationality }}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="report-section">
+        <div class="section-label">TRIP DETAILS</div>
+        <table class="report-table">
+          <tr>
+            <td class="report-key">Trip Name:</td>
+            <td class="report-val bold">{{ booking.TripName }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Destination:</td>
+            <td class="report-val">{{ booking.City }}, {{ booking.CountryName }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Start Date:</td>
+            <td class="report-val">{{ booking.StartDate.strftime('%d-%b-%Y').upper() if booking.StartDate else 'N/A' }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">End Date:</td>
+            <td class="report-val">{{ booking.EndDate.strftime('%d-%b-%Y').upper() if booking.EndDate else 'N/A' }}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="report-section">
+        <div class="section-label">BOOKING DETAILS</div>
+        <table class="report-table striped">
+          <tr>
+            <td class="report-key">Booking ID:</td>
+            <td class="report-val">BKG-{{ booking.BookingDate.strftime('%Y%m%d') if booking.BookingDate else '00000000' }}-{{ '%03d' | format(booking.BookingID) }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Booking Type:</td>
+            <td class="report-val">{{ booking.BookingType }}</td>
+          </tr>
+
+          {% if flight %}
+          <tr>
+            <td class="report-key">Airline:</td>
+            <td class="report-val">{{ flight.Airline }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Departure:</td>
+            <td class="report-val">{{ flight.DepartureCity }} - {{ flight.DepartureTime.strftime('%d-%b-%Y %H:%M').upper() if flight.DepartureTime else '' }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Arrival:</td>
+            <td class="report-val">{{ flight.ArrivalCity }} - {{ flight.ArrivalTime.strftime('%d-%b-%Y %H:%M').upper() if flight.ArrivalTime else '' }}</td>
+          </tr>
+          {% endif %}
+
+          {% if hotel %}
+          <tr>
+            <td class="report-key">Hotel:</td>
+            <td class="report-val">{{ hotel.HotelName }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Location:</td>
+            <td class="report-val">{{ hotel.Location }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Check-in:</td>
+            <td class="report-val">{{ hotel.CheckInDate.strftime('%d-%b-%Y').upper() if hotel.CheckInDate else '' }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Check-out:</td>
+            <td class="report-val">{{ hotel.CheckOutDate.strftime('%d-%b-%Y').upper() if hotel.CheckOutDate else '' }}</td>
+          </tr>
+          {% endif %}
+
+          <tr>
+            <td class="report-key">Booking Date:</td>
+            <td class="report-val">{{ booking.BookingDate.strftime('%d-%b-%Y').upper() if booking.BookingDate else '' }}</td>
+          </tr>
+          <tr>
+            <td class="report-key">Status:</td>
+            <td class="report-val">
+              <span class="status-badge">{{ booking.Status }}</span>
+            </td>
+          </tr>
+          <tr class="total-row">
+            <td class="report-key bold">Total Price:</td>
+            <td class="report-val bold">USD {{ '%.2f' | format(booking.TotalPrice) }}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="report-section">
+        <div class="section-label">VISA INFORMATION — DEMO DATA</div><p class="muted">Illustrative data only; not personalized visa advice.</p>
+        {% if visa_requirements %}
+          {% for visa in visa_requirements %}
+          <div class="visa-info-box">
+            <div class="visa-type">{{ visa.VisaType }}</div>
+            <div>{{ visa.Requirements }}</div>
+            {% if visa.ProcessingTime %}
+            <div class="visa-processing">Processing time: {{ visa.ProcessingTime }} days</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="visa-info-box">
+            No demonstration visa data is available for {{ booking.CountryName }}. This app does not determine visa eligibility.
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="card-footer">
+        <a href="/" class="btn">Back to Dashboard</a>
+        <div class="btn-group">
+          <button onclick="window.print()" class="btn">Print</button>
+          <a href="/" class="btn btn-primary">Done</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

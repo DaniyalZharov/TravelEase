@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Form - TravelEase</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card">
+
+      <div class="card-header">
+        <span class="brand">TravelEase</span>
+        <span class="version">Version 1.0</span>
+      </div>
+
+      <div class="card-title-row">
+        <div>
+          <div class="card-title">Booking Form</div>
+          <div class="card-subtitle">Record a flight or hotel booking for your trip</div>
+        </div>
+        <div class="card-meta">
+          <div>Page: 1 of 2</div>
+          <div>Date: {{ today }}</div>
+        </div>
+      </div>
+
+      {% if errors %}
+      <div class="error-box">
+        {% for error in errors %}
+        <div class="error-item">- {{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="/booking">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-section">
+          <div class="section-label">TRIP REFERENCE</div>
+
+          <div class="form-row">
+            <label class="form-label muted">Trip ID:</label>
+            <select class="field-input" id="booking_trip" name="trip_id" required>
+              <option value="">Select trip...</option>
+              {% for trip in trips %}
+              <option data-destination="{{ trip.City }}, {{ trip.CountryName }}" value="{{ trip.TripID }}"
+                {% if trip_id and trip.TripID|string == trip_id|string %}selected{% endif %}>
+                {{ trip.TripName }} - {{ trip.City }}, {{ trip.CountryName }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {% if selected_trip %}
+          <div class="form-row">
+            <label class="form-label muted">Destination:</label>
+            <div class="field-readonly" id="booking_destination">{{ selected_trip.City }}, {{ selected_trip.CountryName }}</div>
+          </div>
+          {% else %}
+          <div class="form-row">
+            <label class="form-label muted">Destination:</label>
+            <div class="field-readonly" id="booking_destination">Auto-filled from selected trip</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="form-section">
+          <div class="section-label">BOOKING TYPE</div>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="booking_type" value="Flight"
+                     {% if request.form.get('booking_type', 'Flight') == 'Flight' %}checked{% endif %}
+                     onchange="toggleType(this.value)">
+              Flight
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="booking_type" value="Hotel"
+                     {% if request.form.get('booking_type') == 'Hotel' %}checked{% endif %}
+                     onchange="toggleType(this.value)">
+              Hotel
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section" id="flight-section">
+          <div class="section-label">FLIGHT DETAILS</div>
+
+          <div class="form-row">
+            <label class="form-label">Airline: <span class="required">*</span></label>
+            <input class="field-input" type="text" name="airline"
+                   placeholder="e.g. Emirates"
+                   value="{{ request.form.get('airline', '') }}">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Departure City: <span class="required">*</span></label>
+            <input class="field-input" type="text" name="departure_city"
+                   placeholder="e.g. Dubai"
+                   value="{{ request.form.get('departure_city', '') }}">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Arrival City: <span class="required">*</span></label>
+            <input class="field-input" type="text" name="arrival_city"
+                   placeholder="e.g. London"
+                   value="{{ request.form.get('arrival_city', '') }}">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Travel Dates: <span class="required">*</span></label>
+            <div class="date-grid">
+              <input class="field-input" type="datetime-local" name="departure_time"
+                     value="{{ request.form.get('departure_time', '') }}">
+              <input class="field-input" type="datetime-local" name="arrival_time"
+                     value="{{ request.form.get('arrival_time', '') }}">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Price (USD): <span class="required">*</span></label>
+            <input class="field-input" type="number" name="price" step="0.01" min="0"
+                   placeholder="e.g. 850.00"
+                   value="{{ request.form.get('price', '') }}">
+          </div>
+        </div>
+
+        <div class="form-section" id="hotel-section" style="display:none;">
+          <div class="section-label">HOTEL DETAILS</div>
+
+          <div class="form-row">
+            <label class="form-label">Hotel Name: <span class="required">*</span></label>
+            <input class="field-input" type="text" name="hotel_name"
+                   placeholder="e.g. The Ritz London"
+                   value="{{ request.form.get('hotel_name', '') }}">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Location: <span class="required">*</span></label>
+            <input class="field-input" type="text" name="location"
+                   placeholder="e.g. London, UK"
+                   value="{{ request.form.get('location', '') }}">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Check-in Date: <span class="required">*</span></label>
+            <input class="field-input" type="date" name="checkin_date"
+                   value="{{ request.form.get('checkin_date', '') }}">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Check-out Date: <span class="required">*</span></label>
+            <input class="field-input" type="date" name="checkout_date"
+                   value="{{ request.form.get('checkout_date', '') }}">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Price/Night (USD): <span class="required">*</span></label>
+            <input class="field-input" type="number" name="price_per_night" step="0.01" min="0"
+                   placeholder="e.g. 150.00"
+                   value="{{ request.form.get('price_per_night', '') }}">
+          </div>
+        </div>
+
+        <div style="padding: 12px 24px;">
+          <div class="required-note" style="border:none; padding:0;">
+            * Required fields | Hotel fields will appear when Hotel is selected above
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <a href="/" class="btn">Cancel</a>
+          <div class="btn-group">
+            <a href="/create-trip" class="btn">Back</a>
+            <button type="submit" class="btn btn-primary">Save Booking</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <script>
+    const tripSelect = document.getElementById('booking_trip');
+    tripSelect.addEventListener('change', () => {
+      document.getElementById('booking_destination').textContent = tripSelect.selectedOptions[0].dataset.destination || 'Select a trip';
+    });
+    function toggleType(type) {
+      document.getElementById('flight-section').style.display = type === 'Flight' ? 'block' : 'none';
+      document.getElementById('hotel-section').style.display  = type === 'Hotel'  ? 'block' : 'none';
+    }
+    var checked = document.querySelector('input[name="booking_type"]:checked');
+    if (checked) toggleType(checked.value);
+  </script>
+</body>
+</html>
